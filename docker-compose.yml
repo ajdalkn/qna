@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  db:
+    restart: unless-stopped
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_NAME: ${DATABASES_NAME}
+      POSTGRES_USER: ${DATABASES_USER}
+      POSTGRES_PASSWORD: ${DATABASES_PASSWORD}
+  web:
+    restart: unless-stopped
+    build: .
+    command:  python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/quora
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db

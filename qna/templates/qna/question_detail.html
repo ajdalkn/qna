@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        {% if user.is_authenticated %}
+        <a class="btn btn-primary" href="{% url 'ask-question' %}">Ask a Question</a>
+        {% else%}
+            <p>Need to ask a question? Please <a href="{% url 'login' %}">Login</a></p>
+        {% endif %}
+    </div>
+    <div class="container py-5">
+    <!-- Question Card -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-body">
+            <h2 class="card-title">{{ question.question }}</h2>
+            <p class="text-muted mb-0">
+                Asked by <strong>{{ question.user.first_name }}</strong>
+                on {{ question.created_on|date:"F j, Y, g:i a" }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Answers Section -->
+    <div class="mb-4">
+        <h4 class="mb-3">Answers <span class="badge bg-secondary">{{ answers.count }}</span></h4>
+
+        {% if answers %}
+            <div class="d-flex flex-column gap-3">
+                {% for answer in answers %}
+                <div class="card shadow-sm mb-3">
+    <div class="row g-0">
+        <!-- Left: Like Section -->
+        <div class="col-auto text-center p-3 border-end d-flex flex-column align-items-center justify-content-start" style="min-width: 80px;">
+            <form method="post" action="{% url 'like-answer' answer.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-sm {% if user in answer.likes.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    <i class="bi bi-hand-thumbs-up-fill">like</i>
+                </button>
+            </form>
+            <div class="mt-2">
+                <span class="fw-bold">{{ answer.likes.count }}</span>
+                <div class="text-muted small">likes</div>
+            </div>
+        </div>
+
+        <!-- Right: Answer Content -->
+        <div class="col p-3">
+            <p class="card-text mb-2">{{ answer.answer }}</p>
+            <div class="d-flex justify-content-between small text-muted">
+                <span><i class="bi bi-person"></i> {{ answer.user.first_name }}</span>
+                <span>{{ answer.created_on|date:"F j, Y, g:i a" }}</span>
+            </div>
+        </div>
+    </div>
+    </div>
+    {% endfor %}
+    </div>
+    {% else %}
+        <p class="text-muted">No answers yet. Be the first to contribute!</p>
+    {% endif %}
+    </div>
+
+    <!-- Answer Form -->
+    {% if user.is_authenticated %}
+        {% if not user_answered %}
+        <hr class="my-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Your Answer</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-success mt-2">Post Answer</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <p><a href="{% url 'login' %}">Login</a> to post an answer.</p>
+    {% endif %}
+</div>
+{% endblock content %}
